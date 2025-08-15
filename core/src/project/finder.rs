@@ -4,9 +4,10 @@ use crate::project::{CONFIG_FILE, TomlConfig};
 use crate::{Package, PackageBuilder, Project, ProjectKind, Workspace};
 use anyhow::{Result, bail};
 use std::path::Path;
+use zirael_core::prelude::canonicalize_with_strip;
 
 pub fn find_config<P: AsRef<Path>>(start_path: P, ctx: &mut KelpieContext) -> Result<ProjectId> {
-    let mut current = start_path.as_ref().canonicalize()?;
+    let mut current = canonicalize_with_strip(start_path.as_ref())?;
 
     loop {
         let manifest_path = current.join(CONFIG_FILE);
@@ -30,7 +31,7 @@ impl KelpieContext {
         manifest_path: P,
         is_workspace_member: bool,
     ) -> Result<ProjectId> {
-        let manifest_path = manifest_path.as_ref().canonicalize()?;
+        let manifest_path = canonicalize_with_strip(manifest_path.as_ref())?;
 
         if let Some(existing_id) = self.find_project_by_path(&manifest_path) {
             return Ok(existing_id);
@@ -102,7 +103,18 @@ impl KelpieContext {
 
             self.add_project(workspace_project, manifest_path)
         } else if let Some(package_config) = toml.package {
-            let package_builder = PackageBuilder::from_toml(package_config);
+            let package_builder = PackageBuilder::from_toml(
+                package_config,
+                manifest_path.parent().unwrap().to_path_buf(),
+            );
+
+            if !package_builder.full_entrypoint_path().exists() {
+                bail!(
+                    "entrypoint of package {} doesn't exist",
+                    package_builder.name
+                )
+            }
+
             let package_id = self.add_package(package_builder);
 
             let dependencies = self.resolve_dependencies(

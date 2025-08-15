@@ -12,3 +12,5 @@ fs-err = { workspace = true }
 id-arena = { workspace = true }
 zirael_core = { path = "../../zirael/crates/zirael_core" }
 glob = "0.3.3"
+petgraph = "0.8.2"
+zirael_utils = { workspace = true }

@@ -3,13 +3,13 @@ mod finder;
 mod members;
 mod pretty;
 
+pub use finder::*;
 use id_arena::Id;
+pub use pretty::*;
 use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
-
-pub use finder::*;
-pub use pretty::*;
+use zirael_utils::prelude::PackageType;
 
 pub const CONFIG_FILE: &str = "config.toml";
 
@@ -36,14 +36,8 @@ pub struct TomlPackage {
     pub repository: Option<String>,
     pub homepage: Option<String>,
     pub keywords: Option<Vec<String>>,
-    pub ty: Option<PackageType>,
+    pub r#type: Option<PackageType>,
     pub entrypoint: Option<PathBuf>,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub enum PackageType {
-    Library,
-    Binary,
 }
 
 pub type TomlDependencies = HashMap<String, TomlDependency>;
@@ -104,8 +98,10 @@ pub struct Package {
     pub homepage: Option<String>,
     pub keywords: Option<Vec<String>>,
     pub ty: PackageType,
+    pub root_path: PathBuf,
     pub entrypoint: PathBuf,
 }
+
 #[derive(Clone, Debug)]
 pub struct PackageBuilder {
     pub name: String,
@@ -117,11 +113,12 @@ pub struct PackageBuilder {
     pub homepage: Option<String>,
     pub keywords: Option<Vec<String>>,
     pub ty: PackageType,
+    pub root_path: PathBuf,
     pub entrypoint: PathBuf,
 }
 
 impl PackageBuilder {
-    pub fn from_toml(toml_package: TomlPackage) -> Self {
+    pub fn from_toml(toml_package: TomlPackage, root_path: PathBuf) -> Self {
         Self {
             name: toml_package.name,
             version: toml_package.version,
@@ -131,11 +128,12 @@ impl PackageBuilder {
             repository: toml_package.repository,
             homepage: toml_package.homepage,
             keywords: toml_package.keywords,
-            ty: toml_package.ty.clone().unwrap_or(PackageType::Library),
+            ty: toml_package.r#type.clone().unwrap_or(PackageType::Library),
+            root_path: root_path.clone(),
             entrypoint: toml_package.entrypoint.unwrap_or_else(|| {
-                match toml_package.ty.unwrap_or(PackageType::Library) {
-                    PackageType::Library => PathBuf::from("src/lib.rs"),
-                    PackageType::Binary => PathBuf::from("src/main.rs"),
+                match toml_package.r#type.unwrap_or(PackageType::Library) {
+                    PackageType::Library => PathBuf::from("src/lib.zr"),
+                    PackageType::Binary => PathBuf::from("src/main.zr"),
                 }
             }),
         }
@@ -153,7 +151,18 @@ impl PackageBuilder {
             homepage: self.homepage,
             keywords: self.keywords,
             ty: self.ty,
+            root_path: self.root_path,
             entrypoint: self.entrypoint,
         }
+    }
+
+    pub fn full_entrypoint_path(&self) -> PathBuf {
+        self.root_path.join(&self.entrypoint)
+    }
+}
+
+impl Package {
+    pub fn full_entrypoint_path(&self) -> PathBuf {
+        self.root_path.join(&self.entrypoint)
     }
 }

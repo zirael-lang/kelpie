@@ -166,6 +166,8 @@ dependencies = [
  "anyhow",
  "clap",
  "kelpie-core",
+ "log",
+ "zirael_utils",
 ]
 
 [[package]]
@@ -427,10 +429,12 @@ dependencies = [
  "fs-err",
  "glob",
  "id-arena",
+ "petgraph",
  "serde",
  "serde_derive",
  "toml",
  "zirael_core",
+ "zirael_utils",
 ]
 
 [[package]]
@@ -839,6 +843,7 @@ dependencies = [
  "anyhow",
  "fs-err",
  "tempdir",
+ "zirael_utils",
 ]
 
 [[package]]
@@ -1167,6 +1172,7 @@ dependencies = [
 name = "zirael_core"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "zirael_codegen",
  "zirael_hir",
  "zirael_parser",
@@ -1227,4 +1233,5 @@ dependencies = [
  "once_cell",
  "parking_lot",
  "rayon",
+ "serde",
 ]

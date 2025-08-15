@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tempdir::TempDir;
+use zirael_utils::prelude::canonicalize_with_strip;
 
 static COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -73,7 +74,7 @@ impl Project {
             }
         }
 
-        let exe_path = fs_err::canonicalize(&exe_path)?;
+        let exe_path = canonicalize_with_strip(&exe_path)?;
 
         let counter = COUNTER.fetch_add(1, Ordering::SeqCst);
         let temp_name = format!("kelpie-test-{}", counter);

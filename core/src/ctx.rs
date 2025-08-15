@@ -1,10 +1,12 @@
 use crate::{
-    Dependency, Package, PackageBuilder, PackageId, Project, TomlDependencies, TomlDependency,
+    Dependency, Package, PackageBuilder, PackageId, Project, ProjectKind, TomlDependencies,
+    TomlDependency,
 };
 use anyhow::{Result, bail};
 use id_arena::{Arena, Id};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use zirael_core::prelude::canonicalize_with_strip;
 
 pub type ProjectId = Id<Project>;
 
@@ -44,7 +46,7 @@ impl KelpieContext {
     }
 
     pub fn find_project_by_path<P: AsRef<Path>>(&self, path: P) -> Option<ProjectId> {
-        let canonical_path = path.as_ref().canonicalize().ok()?;
+        let canonical_path = canonicalize_with_strip(path.as_ref()).ok()?;
         self.path_to_project.get(&canonical_path).copied()
     }
 
@@ -61,6 +63,20 @@ impl KelpieContext {
         self.name_to_package.insert(name, package_id);
 
         package_id
+    }
+
+    pub fn find_project_by_package_id(&self, package_id: PackageId) -> Option<ProjectId> {
+        self.projects.iter().find_map(|(project_id, project)| {
+            if let ProjectKind::Package(pid) = &project.kind {
+                if *pid == package_id {
+                    Some(project_id)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
     }
 }
 

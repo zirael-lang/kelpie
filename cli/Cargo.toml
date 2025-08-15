@@ -7,3 +7,5 @@ edition = "2024"
 clap = "4.5.45"
 kelpie-core = { workspace = true }
 anyhow = { workspace = true }
+zirael_utils = { workspace = true }
+log = "0.4.27"

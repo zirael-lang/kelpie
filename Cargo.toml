@@ -5,6 +5,7 @@ members = ["cli", "core", "test-lib", "tests"]
 anyhow = "1.0.99"
 fs-err = "3.1.1"
 id-arena = "2.2.1"
+zirael_utils = { path = "../zirael/crates/zirael_utils" }
 
 kelpie-core = { path = "core", version = "0.1.0" }
 test-lib = { path = "test-lib" }

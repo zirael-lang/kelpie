@@ -4,7 +4,8 @@ use crate::{
 use anyhow::{anyhow, bail};
 use std::env::current_dir;
 use std::path::PathBuf;
-use zirael_core::prelude::debug;
+use zirael_core::prelude::{canonicalize_with_strip, debug};
+use zirael_utils::prelude::PackageType;
 
 impl KelpieContext {
     pub fn resolve_dependencies(
@@ -36,7 +37,7 @@ impl KelpieContext {
                         if let Some(path) = &dep.path {
                             let config_path = base_path.join(path).join(CONFIG_FILE);
                             let canonicalized =
-                                fs_err::canonicalize(&config_path).map_err(|_| {
+                                canonicalize_with_strip(&config_path).map_err(|_| {
                                     anyhow!("couldn't resolve path dependency: {}", name)
                                 })?;
                             debug!(
@@ -49,6 +50,11 @@ impl KelpieContext {
                             let ProjectKind::Package(id) = project.kind else {
                                 bail!("can't import package {} from workspace", name);
                             };
+
+                            let pkg = self.get_package(id).unwrap();
+                            if pkg.ty != PackageType::Library {
+                                bail!("can't import package {} which is a binary", name);
+                            }
 
                             Some(Dependency {
                                 id,

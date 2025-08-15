@@ -12,6 +12,13 @@ pub fn positional(name: &'static str, help: &'static str) -> Arg {
 
 pub const COMPILATION_HEADING: &str = "Compilation options";
 
+pub fn package_arg() -> Arg {
+    opt("package", "Package to build")
+        .short('p')
+        .long("package")
+        .action(ArgAction::Set)
+}
+
 pub fn release_mode() -> Arg {
     opt("release", "Build in release mode")
         .action(ArgAction::SetTrue)

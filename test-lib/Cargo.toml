@@ -8,6 +8,7 @@ publish = false
 tempdir = "0.3.7"
 fs-err = { workspace = true }
 anyhow = { workspace = true }
+zirael_utils = { workspace = true }
 
 [lints]
 workspace = true
