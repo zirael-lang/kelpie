@@ -1,3 +1,4 @@
+mod dependency_resolver;
 mod finder;
 mod members;
 mod pretty;

@@ -23,7 +23,9 @@ pub fn build_cmd() -> Command {
 pub fn build_command(args: &clap::ArgMatches) -> Result<()> {
     let ctx = &mut KelpieContext::new();
     let config = find_config(current_dir()?, ctx)?;
-    print_project_tree(ctx, config, 0);
+    print_project_tree(ctx, config, 0)?;
+    
+    
 
     Ok(())
 }

@@ -1,5 +1,7 @@
-use crate::{Dependency, Package, PackageBuilder, PackageId, Project, TomlDependency};
-use anyhow::Result;
+use crate::{
+    Dependency, Package, PackageBuilder, PackageId, Project, TomlDependencies, TomlDependency,
+};
+use anyhow::{Result, bail};
 use id_arena::{Arena, Id};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -59,37 +61,6 @@ impl KelpieContext {
         self.name_to_package.insert(name, package_id);
 
         package_id
-    }
-
-    pub fn resolve_dependencies(
-        &self,
-        toml_deps: Option<&crate::project::TomlDependencies>,
-    ) -> Result<Vec<Dependency>> {
-        let mut dependencies = Vec::new();
-
-        if let Some(deps) = toml_deps {
-            for (name, dep) in deps {
-                let version = match dep {
-                    TomlDependency::Version(v) => v.clone(),
-                    TomlDependency::Detailed(detailed) => detailed
-                        .version
-                        .as_ref()
-                        .unwrap_or(&"*".to_string())
-                        .clone(),
-                };
-
-                if let Some(&package_id) = self.name_to_package.get(name) {
-                    dependencies.push(Dependency {
-                        id: package_id,
-                        version,
-                    });
-                } else {
-                    println!("Warning: Could not resolve dependency: {}", name);
-                }
-            }
-        }
-
-        Ok(dependencies)
     }
 }
 
