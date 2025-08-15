@@ -1,7 +1,7 @@
 use crate::cli::{debug_mode, dynamic_lib_mode, release_mode, static_lib_mode};
 use anyhow::Result;
 use clap::Command;
-use kelpie_core::find_config;
+use kelpie_core::{KelpieContext, find_config, print_project_tree};
 use std::env::current_dir;
 
 pub fn build_cmd() -> Command {
@@ -21,8 +21,9 @@ pub fn build_cmd() -> Command {
 }
 
 pub fn build_command(args: &clap::ArgMatches) -> Result<()> {
-    let config = find_config(current_dir()?)?;
-    println!("{:?}", config);
+    let ctx = &mut KelpieContext::new();
+    let config = find_config(current_dir()?, ctx)?;
+    print_project_tree(ctx, config, 0);
 
     Ok(())
 }
